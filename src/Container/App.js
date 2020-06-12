@@ -2,44 +2,44 @@ import React, { Component } from 'react';
 import CardsList from '../Components/CardsList';
 import Scroll from '../Components/Scroll';
 import Search from '../Components/Search';
+import {connect} from 'react-redux';
 import './App.css';
 
+import {setSearchField,requestRobots} from '../action';
 
-class App extends Component{
-    constructor(){
-        super()
-        this.state={
-            robot: [],
-            searchfield:''
-        }
-        console.log("Comp");
+const mapStateToProps=state=>{
+    console.log("hi",state)
+    return{
+      searchField:state.searchRobots.searchField, 
+      robots:state.requestRobots.robots,
+      isPending:state.requestRobots.isPending
     }
+}
 
-    componentDidMount(){
+const mapDispatchToProps=(dispatch)=>{
+    return {
+        onSearchChange:(event)=>dispatch(setSearchField(event.target.value)),
+        onRequestRobots:()=>dispatch(requestRobots())
 
-fetch('https://jsonplaceholder.typicode.com/users').then(response=>response.json()).then(user=>this.setState({robot:user}));
-
+    }
+}
+ 
+class App extends Component{
+    
+    componentDidMount(event){
+  this.props.onRequestRobots()
     }
      
-    onSearchChange=(event)=>{
-        this.setState({searchfield:event.target.value})
-      
         
-        }
-        
-    
-    
-    
+     render(){
 
-    render(){
-
-        const{robot,searchfield}=this.state;
+        const{searchField,onSearchChange,robots,isPending}=this.props;
         
-        const filterobots=robot.filter(cat=>{
-            return cat.name.toLowerCase().includes(searchfield.toLowerCase())
+        const filterobots=robots.filter(cat=>{
+            return cat.name.toLowerCase().includes(searchField.toLowerCase())
             
         })
-        return !robot.length ?
+        return isPending ?
             <h1 className="tc">now loading</h1> :
     
         (
@@ -48,7 +48,7 @@ fetch('https://jsonplaceholder.typicode.com/users').then(response=>response.json
             <div className="tc">
             
             <h1 className="f1">robofriends</h1>
-            <Search   searchnew={this.onSearchChange}/>
+            <Search   searchnew={onSearchChange}/>
             <Scroll>
             <CardsList robo ={filterobots}/>   
             </Scroll>
@@ -64,11 +64,4 @@ fetch('https://jsonplaceholder.typicode.com/users').then(response=>response.json
     
 
     
-    
-
-
-    
-
-
-
-export default App;
+export default connect(mapStateToProps,mapDispatchToProps)(App);
